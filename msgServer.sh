@@ -15,31 +15,39 @@ counter=0
 while [ $counter -ne $workers ] 
 do
     . worker.sh $counter &
-    echo "Created worker ${counter}"
     let "counter=counter+1"
 done
+echo "Initialized ${workers} workers!"
 
 currWorker=0
 while [ $terminate != 0 ]
 do
     echo "Read FIFO"
-    sleep 3
+    sleep 2
     if read line ; then
 
         if [ "$line" == 'shutdown' ] ; then
-            exit 0
+            let "terminate=0"
+            let "counter=0"
+            while [ $counter -ne $workers ] 
+            do
+                echo "shutdown" > /tmp/worker-$USER-$counter-inputfifo
+                let "counter=counter+1"
+            done
         elif [ "$line" == 'status' ] ; then
             echo $workers
             echo "test"
         else
             echo $line > /tmp/worker-$USER-$currWorker-inputfifo
-            $currWorker=$(( $currWorker + 1 ))
+            let "currWorker=currWorker+1"
 
             if [ $currWorker -eq $workers ] ; then
-                $currWorker=$(( $currWorker - 8 ))
+                let "currWorker=currWorker-8"
             fi
 
         fi
 
     fi
 done </tmp/server-$USER-inputfifo
+
+rm /tmp/server-$USER-inputfifo

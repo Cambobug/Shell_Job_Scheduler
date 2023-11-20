@@ -13,16 +13,12 @@ if [ ! -p /tmp/server-$USER-inputfifo ] ; then
     exit 1
 fi
 
-echo Gay
-
 if [ "$1" == '-x' ] ; then
     echo 1
-    echo 'shutdown' > "$serverPipe"`
+    echo 'SPEC@ shutdown' > "$serverPipe"
 elif [ "$1" == '-s' ] ; then
     echo 2
-    echo 'status' > "$serverPipe"
+    echo 'SPEC@ status' > "$serverPipe"
 else
-    echo 3
-    echo "$@"
-    echo  "$@" > "$serverPipe"
+    echo  "CMD@ $@" > "$serverPipe"
 fi

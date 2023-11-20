@@ -22,18 +22,21 @@ if [ ! -p /tmp/worker-$USER-$1-inputfifo ] ; then
 fi
 
 terminate=1
-
+jobsCompleted=0
 while [ $terminate != 0 ]
 do
-    sleep 3
+    sleep 1
     if read line ; then
         if [ "$line" == 'shutdown' ] ; then
-            exit 0
+            let "terminate=0"
         else
-            #$($line) > $logFile
-            echo $line
-            echo "done $1" > $serverPipe
+            echo "----------- Job ${jobsCompleted} -----------"
+            exec $line > $logFile
+            echo "Worker $1 running ${line}"
+            echo "Done@$1" > $serverPipe
         fi
     fi
 
 done </tmp/worker-$USER-$1-inputfifo
+
+rm /tmp/worker-$USER-$1-inputfifo
