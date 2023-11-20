@@ -5,13 +5,17 @@ terminate=1
 
 if [ ! -p /tmp/server-$USER-inputfifo ] ; then 
     mkfifo /tmp/server-$USER-inputfifo
+else
+    rm /tmp/server-$USER-inputfifo
+    mkfifo /tmp/server-$USER-inputfifo
 fi
 
 counter=0
-while [ "$counter" != $workers ] 
+while [ $counter -ne $workers ] 
 do
     $(./worker.sh $counter)
     $counter=$(( $counter + 1 ))
+    echo "Created worker ${counter}"
 done
 
 currWorker=0
@@ -29,7 +33,7 @@ do
             echo $line > /tmp/worker-$USER-$currWorker-inputfifo
             $currWorker=$(( $currWorker + 1 ))
 
-            if [ $currWorker == $workers ] ; then
+            if [ $currWorker -eq $workers ] ; then
                 $currWorker=$(( $currWorker - 8 ))
             fi
 

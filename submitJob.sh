@@ -8,15 +8,19 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-if [ ! -p $serverPipe ] ; then 
+if [ ! -p /tmp/server-$USER-inputfifo ] ; then 
     echo "Server pipe doesnt exist"
-    exit 0
+    exit 1
 fi
 
+echo Gay
+
 if [ "$1" == '-x' ] ; then
-    echo 'shutdown' > $serverPipe
+    echo 'shutdown'
 elif [ "$1" == '-s' ] ; then
-    echo 'status' > $serverPipe
+    echo 'status'
 else
-    echo  "$@" > $serverPipe
-fi
+    echo  "$@"
+fi > $serverPipe
+
+echo Big
