@@ -1,4 +1,5 @@
 #! /bin/bash
+
 workers=$(cat /proc/cpuinfo | grep processor | wc -l)
 USER=cfrase15
 terminate=1
@@ -13,14 +14,15 @@ fi
 counter=0
 while [ $counter -ne $workers ] 
 do
-    $(./worker.sh $counter)
-    $counter=$(( $counter + 1 ))
+    . worker.sh $counter &
     echo "Created worker ${counter}"
+    let "counter=counter+1"
 done
 
 currWorker=0
 while [ $terminate != 0 ]
 do
+    echo "Read FIFO"
     sleep 3
     if read line ; then
 

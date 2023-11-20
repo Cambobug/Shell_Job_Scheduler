@@ -16,11 +16,13 @@ fi
 echo Gay
 
 if [ "$1" == '-x' ] ; then
-    echo 'shutdown'
+    echo 1
+    echo 'shutdown' > "$serverPipe"`
 elif [ "$1" == '-s' ] ; then
-    echo 'status'
+    echo 2
+    echo 'status' > "$serverPipe"
 else
-    echo  "$@"
-fi > $serverPipe
-
-echo Big
+    echo 3
+    echo "$@"
+    echo  "$@" > "$serverPipe"
+fi
