@@ -15,10 +15,10 @@ fi
 
 if [ "$1" == '-x' ] ; then
     echo 1
-    echo 'SPEC@ shutdown' > "$serverPipe"
+    echo 'SPEC@shutdown' > "$serverPipe"
 elif [ "$1" == '-s' ] ; then
     echo 2
-    echo 'SPEC@ status' > "$serverPipe"
+    echo 'SPEC@status' > "$serverPipe"
 else
     echo  "CMD@ $@" > "$serverPipe"
 fi

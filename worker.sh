@@ -30,10 +30,11 @@ do
         if [ "$line" == 'shutdown' ] ; then
             let "terminate=0"
         else
-            echo "----------- Job ${jobsCompleted} -----------"
+            echo "----------- Job ${jobsCompleted} -----------" > $logFile
+            echo "$1 $line"
             exec $line > $logFile
             echo "Worker $1 running ${line}"
-            echo "Done@$1" > $serverPipe
+            echo "SPEC@$1" > $serverPipe
         fi
     fi
 
