@@ -4,11 +4,13 @@ workers=$(cat /proc/cpuinfo | grep processor | wc -l)
 USER=cfrase15
 terminate=1
 
-if [ ! -p /tmp/server-$USER-inputfifo ] ; then 
-    mkfifo "/tmp/server-$USER-inputfifo"
-else
+if [ -e /tmp/server-$USER-inputfifo ] ; then
     rm "/tmp/server-$USER-inputfifo"
     mkfifo "/tmp/server-$USER-inputfifo"
+fi
+
+if [ ! -p /tmp/server-$USER-inputfifo ] ; then 
+    mkfifo "/tmp/server-$USER-inputfifo" 
 fi
 
 counter=0
@@ -42,6 +44,7 @@ do
                 let "counter=0"
                 while [ $counter -ne $workers ] 
                 do
+                    sleep 0.1
                     echo "shutdown" > "/tmp/worker-$USER-${counter}-inputfifo" &
                     let "counter=counter+1"
                 done
@@ -57,7 +60,7 @@ do
             fi
 
         elif [ "${splits[0]}" == 'CMD' ] ; then #command
-            echo "Worker $currWorker attempting ${splits[1]}!"
+            #echo "Worker $currWorker attempting ${splits[1]}!"
             commandQueue+=("${splits[1]}") #places a command in the queue
 
             if [ "${workerArray[$currWorker]}" -eq 0 ] ; then #if the current worker is available to 
@@ -70,7 +73,6 @@ do
                 fi
                 commandQueue=("${commandQueue[@]:1}")
             fi
-            
         fi
     fi
 done
