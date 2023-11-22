@@ -10,36 +10,23 @@ fi
 
 logFile="/tmp/worker-$USER.$1.log"
 
-if [ ! -p $logFile ] ; then
-    touch $logFile # creates log file for worker
-else
-    > $logFile #empties log file, redirects nothin in
-fi
-
-# checks if the fifo pipe exists, creates it if not
-if [ ! -p /tmp/worker-$USER-$1-inputfifo ] ; then 
-    mkfifo /tmp/worker-$USER-$1-inputfifo
-fi
-
+echo "Worker $1 initiated!" > $logFile
 terminate=1
 jobsCompleted=0
 while [ $terminate != 0 ]
 do
-    #sleep 0.1
-    if read -r line ; then
+    sleep 0.1
+    if read -r line < /tmp/worker-$USER-$1-inputfifo ; then
         if [ "$line" == 'shutdown' ] ; then
-            echo $1 $line
+            echo "Worker $1 exiting" >> $logFile
+            rm /tmp/worker-$USER-$1-inputfifo
             let "terminate=0"
-            sleep 0.$1
-            echo "SPEC@exit" > $serverPipe
         else
-            echo "----------- Job ${jobsCompleted} -----------" > $logFile
-            echo "Process $1 $line"
-            exec $line > $logFile
-            echo "Worker $1 running ${line}"
-            echo "SPEC@$1" > $serverPipe
+            echo "----------- Job ${jobsCompleted} -----------" >> $logFile
+            echo "Worker $1 running ${line}" >> $logFile
+            eval "$line" >> $logFile
+            let "jobsCompleted=jobsCompleted+1"
+            echo "SPEC@$1" >> $serverPipe
         fi
     fi
-done < /tmp/worker-$USER-$1-inputfifo
-
-rm /tmp/worker-$USER-$1-inputfifo
+done
