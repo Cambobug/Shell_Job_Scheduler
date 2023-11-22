@@ -26,7 +26,7 @@ do
             echo "----------- Job ${jobsCompleted} -----------" >> $logFile
             echo "Worker $1 running ${line}" >> $logFile
             #echo "Worker $1 running ${line}"
-            eval "$line" >> $logFile
+            eval "$line" >> $logFile 2>&1 1>>$logFile
             let "jobsCompleted=jobsCompleted+1"
             echo "SPEC@$1" >> $serverPipe
         fi
