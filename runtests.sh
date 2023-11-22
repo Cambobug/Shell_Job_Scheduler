@@ -46,7 +46,7 @@ fi
 sleep 1
 
 echo "----------- TEST 3 -----------"
-echo "Passing each worker a sleep 10 command"
+echo "Passing each worker a sleep 1 command"
 
 let "counter=0"
 while [ $counter -ne $expectedWorkers ] 
@@ -71,6 +71,37 @@ if [ $numFinds -eq $expectedWorkers ] ; then
     echo "PASS: Expected number of sleep commands found exist!"
 else
     echo "FAIL: Expected number of sleep commands not found!"
+fi
+sleep 1
+
+echo "----------- TEST 4 -----------"
+echo "Passing each worker an ls command"
+
+let "counter=0"
+while [ $counter -ne $expectedWorkers ] 
+do
+    ./submitJob.sh 'ls' 
+    let "counter=counter+1"
+    sleep 0.1
+done
+sleep 3
+
+let "counter=0"
+let "numFinds=0"
+while [ $counter -ne $expectedWorkers ]
+do
+    result=$(grep -ci 'Assignment 4 (1).pdf\|msgServer.sh\|runtests.sh\|submitJob\|worker.sh' "/tmp/worker-$USER.${counter}.log")
+    #grep -ci 'Assignment 4 (1).pdf\|msgServer.sh\|runtests.sh\|submitJob\|worker.sh' "/tmp/worker-$USER.${counter}.log"
+    if [ $result -eq 5 ] ; then
+        let "numFinds=numFinds+1"
+    fi
+    let "counter=counter+1"
+done
+
+if [ $numFinds -eq $expectedWorkers ] ; then
+    echo "PASS: Expected number of ls command output found!"
+else
+    echo "FAIL: Expected number of ls command output not found!"
 fi
 sleep 1
 

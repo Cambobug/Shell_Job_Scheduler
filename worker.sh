@@ -18,12 +18,14 @@ do
     sleep 0.1
     if read -r line < /tmp/worker-$USER-$1-inputfifo ; then
         if [ "$line" == 'shutdown' ] ; then
-            echo "Worker $1 exiting" >> $logFile
-            rm /tmp/worker-$USER-$1-inputfifo
             let "terminate=0"
+            echo "Worker $1 exiting" >> $logFile
+            rm "/tmp/worker-$USER-$1-inputfifo"
+            #exit 0
         else
             echo "----------- Job ${jobsCompleted} -----------" >> $logFile
             echo "Worker $1 running ${line}" >> $logFile
+            #echo "Worker $1 running ${line}"
             eval "$line" >> $logFile
             let "jobsCompleted=jobsCompleted+1"
             echo "SPEC@$1" >> $serverPipe
