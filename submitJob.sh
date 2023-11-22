@@ -20,5 +20,5 @@ elif [ "$1" == '-s' ] ; then
     echo 2
     echo 'SPEC@status' > "$serverPipe"
 else
-    echo  "CMD@ $@" > "$serverPipe"
+    echo  "CMD@$@" > "$serverPipe"
 fi

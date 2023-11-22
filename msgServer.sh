@@ -28,19 +28,38 @@ commandQueue=()
 while [ $terminate != 0 ]
 do
     #echo "Read FIFO"
-    sleep 1
-    if read -r line </tmp/server-$USER-inputfifo ; then
+    sleep 0.1
+    if read -r line  ; then
+        echo $line
         read -ra splits <<< "$line"
         if [ "${splits[0]}" == 'SPEC' ] ; then #special command
-
+            echo "  in SPEC"
             if [ "${splits[1]}" == 'shutdown' ] ; then #shutdown
+                echo "      in shutdown"
                 let "terminate=0"
                 let "counter=0"
                 while [ $counter -ne $workers ] 
                 do
-                    echo "shutdown" > /tmp/worker-$USER-$counter-inputfifo
+                    echo "kill me"
+                    echo "shutdown" > /tmp/worker-$USER-$counter-inputfifo &
                     let "counter=counter+1"
                 done
+                echo "          shudowns sent"
+
+                procTerm=0
+                while [ $procTerm -ne $workers ] # loop checks the FIFO until it finds the workers exit 
+                do  
+                    if read -r line  ; then
+                        read -ra splits <<< "$line"
+                        if [ "${splits[0]}" == 'SPEC' ] ; then
+                            if [ "${splits[1]}" == 'exit' ] ; then
+                                echo "Proc Exited"
+                                let "procTerm=procTerm+1"
+                            fi
+                        fi
+                    fi
+                done < /tmp/server-$USER-inputfifo
+
             elif [ "${splits[1]}" == 'status' ] ; then #status
                 echo $workers
                 echo "test"
@@ -62,12 +81,12 @@ do
             fi
 
         elif [ "${splits[0]}" == 'CMD' ] ; then #command
-            echo "$currWorker ${workerArray[$currworker]}"
+            echo $currWorker "${workerArray[$currworker]}"
             commandQueue+=("${splits[1]}") #places a command in the queue
 
             if [ "${workerArray[$currWorker]}" -eq 0 ] ; then #if the current worker is available to 
                 echo "${commandQueue[0]}" > /tmp/worker-$USER-$currWorker-inputfifo
-                workerArray[$currWorker]=1
+                let "workerArray[$currWorker]=1"
                 let "currWorker=currWorker+1"
 
                 if [ $currWorker -eq $workers ] ; then
@@ -77,8 +96,7 @@ do
             fi
             
         fi
-
     fi
-done 
+done < /tmp/server-$USER-inputfifo
 
 rm /tmp/server-$USER-inputfifo

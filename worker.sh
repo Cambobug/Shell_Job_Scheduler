@@ -25,19 +25,21 @@ terminate=1
 jobsCompleted=0
 while [ $terminate != 0 ]
 do
-    sleep 1
-    if read line ; then
+    #sleep 0.1
+    if read -r line ; then
         if [ "$line" == 'shutdown' ] ; then
+            echo $1 $line
             let "terminate=0"
+            sleep 0.$1
+            echo "SPEC@exit" > $serverPipe
         else
             echo "----------- Job ${jobsCompleted} -----------" > $logFile
-            echo "$1 $line"
+            echo "Process $1 $line"
             exec $line > $logFile
             echo "Worker $1 running ${line}"
             echo "SPEC@$1" > $serverPipe
         fi
     fi
-
-done </tmp/worker-$USER-$1-inputfifo
+done < /tmp/worker-$USER-$1-inputfifo
 
 rm /tmp/worker-$USER-$1-inputfifo
