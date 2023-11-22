@@ -46,3 +46,11 @@ else
 fi
 
 echo "----------- TEST 3 -----------"
+echo "Passing each worker a sleep 10 command"
+
+let "counter=0"
+while [ $counter -ne $expectedWorkers ] 
+do
+    . "/submitJob.sh sleep 10"
+    let "counter=counter+1"
+done
