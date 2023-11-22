@@ -90,9 +90,8 @@ let "counter=0"
 let "numFinds=0"
 while [ $counter -ne $expectedWorkers ]
 do
-    result=$(grep -ci 'Assignment 4 (1).pdf\|msgServer.sh\|runtests.sh\|submitJob\|worker.sh' "/tmp/worker-$USER.${counter}.log")
-    #grep -ci 'Assignment 4 (1).pdf\|msgServer.sh\|runtests.sh\|submitJob\|worker.sh' "/tmp/worker-$USER.${counter}.log"
-    if [ $result -eq 5 ] ; then
+    result=$(grep -ci 'msgServer.sh\|runtests.sh\|submitJob\|worker.sh' "/tmp/worker-$USER.${counter}.log")
+    if [ $result -eq 4 ] ; then
         let "numFinds=numFinds+1"
     fi
     let "counter=counter+1"
@@ -105,13 +104,57 @@ else
 fi
 sleep 1
 
-echo "----------- TEST Y -----------"
+echo "----------- TEST 5 -----------"
+echo "Passing a bad command to a worker"
+
+./submitJob.sh BCommand
+
+result=$(grep -ci 'command not found' "/tmp/worker-$USER.0.log")
+
+if [ $result -eq 1 ] ; then
+    echo "PASS: Command was not executed and error message forwarded to logfile!"
+else
+    echo "FAIL: Command was executed or has no indication of error!"
+fi
+sleep 1
+
+echo "----------- TEST 6 -----------"
+echo "Passing a command with arguments"
+
+./submitJob.sh "ls -l"
+sleep 1
+
+result=$(grep -ci 'total' "/tmp/worker-$USER.1.log")
+
+if [ $result -eq 1 ] ; then
+    echo "PASS: ls -l entries found in the log file!"
+else
+    echo "FAIL: ls -l entries not found in the log file!"
+fi
+sleep 1
+
+echo "----------- TEST 7 -----------"
+echo "Passing a pipe command"
+
+./submitJob.sh "ls | wc -l"
+sleep 1
+
+result=$(grep -ci '4' "/tmp/worker-$USER.2.log")
+
+if [ $result -eq 1 ] ; then
+    echo "PASS: Piped command output found in the log file!"
+else
+    echo "FAIL: Piped command output not found in the log file!"
+fi
+sleep 1
+
+echo "----------- TEST 8 -----------"
 echo "Running status command"
 
 ./submitJob.sh -s
 sleep 1
 
-echo "----------- TEST X -----------"
+echo "----------- TEST 9 -----------"
 echo "Sending shutdown command"
 
 ./submitJob.sh -x
@@ -141,7 +184,7 @@ else
 fi
 sleep 1
 
-echo "----------- TEST Z -----------"
+echo "----------- TEST 10 -----------"
 echo "Checking existence of log files"
 
 let "counter=0"
