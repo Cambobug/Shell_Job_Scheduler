@@ -8,6 +8,12 @@ echo "Starting server and workers!"
 
 sleep 2
 
+if [ -e "/tmp/server-$USER-inputfifo" ] ; then
+    echo "PASS: Expected server FIFO exists!"
+else
+    echo "FAIL: Expected server FIFO does not exist!"
+fi
+
 counter=0
 filesFound=0
 while [ $counter -ne $expectedWorkers ] 
