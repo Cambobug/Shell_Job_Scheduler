@@ -69,7 +69,7 @@ do
                 let "currWorker=currWorker+1"
 
                 if [ $currWorker -eq $workers ] ; then
-                    let "currWorker=currWorker-8"
+                    let "currWorker=currWorker-workers"
                 fi
                 commandQueue=("${commandQueue[@]:1}")
             fi
